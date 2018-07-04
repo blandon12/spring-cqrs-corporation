@@ -1,10 +1,10 @@
 package com.tesburys.corporation.shop.cashregister;
 
 import com.tesburys.corporation.events.shop.cashregister.*;
+import com.tesburys.corporation.events.shop.cashregister.dto.BasketLine;
 import org.axonframework.commandhandling.model.AggregateIdentifier;
 import org.axonframework.commandhandling.model.AggregateRoot;
 import org.axonframework.eventsourcing.EventSourcingHandler;
-
 import java.math.BigDecimal;
 import java.util.LinkedList;
 import java.util.List;
@@ -18,7 +18,8 @@ public class CashRegister {
     private enum State {
         IDLE,
         ACCEPTING_PRODUCTS,
-        ERROR_PRICE_NOT_FOUND
+        ERROR_PRICE_NOT_FOUND,
+        CHECKOUT
     }
 
     @AggregateIdentifier
@@ -59,6 +60,18 @@ public class CashRegister {
         apply(new ErrorResolvedEvent(id, currentState.toString()));
     }
 
+    void checkout() {
+        if (currentState.equals(State.ACCEPTING_PRODUCTS)) {
+            apply(new CheckoutStartedEvent(id));
+        }
+    }
+
+    void completedCheckout(String paymentReference) {
+        if (currentState.equals(State.CHECKOUT)) {
+            apply(new CheckoutCompletedEvent(id, paymentReference, basket));
+        }
+    }
+
     @EventSourcingHandler
     public void on(CashRegisterRegisteredEvent event) {
         id = event.getId();
@@ -85,5 +98,16 @@ public class CashRegister {
         if (event.getErrorType().equals(State.ERROR_PRICE_NOT_FOUND.toString())) {
             currentState = State.ACCEPTING_PRODUCTS;
         }
+    }
+
+    @EventSourcingHandler
+    public void on(CheckoutStartedEvent event) {
+        currentState = State.CHECKOUT;
+    }
+
+    @EventSourcingHandler
+    public void on(CheckoutCompletedEvent event) {
+        currentState = State.IDLE;
+        basket = new LinkedList<>();
     }
 }

@@ -1,9 +1,6 @@
 package com.tesburys.corporation.shop.cashregister;
 
-import com.tesburys.corporation.command.shop.cashregister.AddProductCommand;
-import com.tesburys.corporation.command.shop.cashregister.RegisterCashRegisterCommand;
-import com.tesburys.corporation.command.shop.cashregister.ResolveCurrentErrorCommand;
-import com.tesburys.corporation.command.shop.cashregister.StartAcceptingProductsCommand;
+import com.tesburys.corporation.command.shop.cashregister.*;
 import org.axonframework.commandhandling.CommandHandler;
 import org.axonframework.commandhandling.model.Aggregate;
 import org.axonframework.commandhandling.model.Repository;
@@ -73,5 +70,19 @@ public class CashRegisterCommandHandler {
         Aggregate<CashRegister> cashRegisterAggregate = cashRegisterRepository.load(command.getCashRegisterId());
 
         cashRegisterAggregate.execute(CashRegister::resolveCurrentError);
+    }
+
+    @CommandHandler
+    public void handle(BeginCheckoutCommand command) {
+        Aggregate<CashRegister> cashRegisterAggregate = cashRegisterRepository.load(command.getCashRegisterId());
+
+        cashRegisterAggregate.execute(CashRegister::checkout);
+    }
+
+    @CommandHandler
+    public void handle(CompletedCheckoutCommand command) {
+        Aggregate<CashRegister> cashRegisterAggregate = cashRegisterRepository.load(command.getCashRegisterId());
+
+        cashRegisterAggregate.execute(cashRegister -> cashRegister.completedCheckout(command.getPaymentReference()));
     }
 }

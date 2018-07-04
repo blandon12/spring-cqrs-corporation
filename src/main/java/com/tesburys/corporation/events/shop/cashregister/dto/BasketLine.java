@@ -1,4 +1,4 @@
-package com.tesburys.corporation.shop.cashregister;
+package com.tesburys.corporation.events.shop.cashregister.dto;
 
 import java.math.BigDecimal;
 
