@@ -8,7 +8,6 @@ import org.axonframework.eventsourcing.EventSourcingHandler;
 import java.math.BigDecimal;
 import java.util.LinkedList;
 import java.util.List;
-
 import static org.axonframework.commandhandling.model.AggregateLifecycle.apply;
 
 @AggregateRoot
